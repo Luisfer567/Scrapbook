@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scrapbook</title>
+<link href="https://fonts.googleapis.com/css2?family=Patrick+Hand&family=Rubik+Mono+One&display=swap" rel="stylesheet">
+<style>
+/* ============ 1. VARIABLES DE DISEÑO (ROJO & LILA) ============ */
+:root{
+  --cielo:#e6dcf5;
+  --tinta:#2d1b36;
+  --papel:#ffffff;
+  --rojo:#e3243f;
+  --amarillo:#f5d061;
+  --locker:#9d7eb0;
+  --fuente-titulo:'Rubik Mono One','Arial Black',sans-serif;
+  --fuente-texto:'Patrick Hand','Comic Sans MS',cursive;
+}
+*{box-sizing:border-box;margin:0}
+html,body{min-height:100%}
+body{
+  font-family:var(--fuente-texto); font-size:1.2rem; color:var(--tinta);
+  background:var(--cielo);
+  background-image:radial-gradient(rgba(45,27,54,.15) 1.5px,transparent 1.5px);
+  background-size:22px 22px;
+  overflow-x:hidden; position:relative;
+}
+:focus-visible{outline:3px dashed var(--rojo);outline-offset:3px}
+
+/* ============ 2. ESTRUCTURA GENERAL ============ */
+.pagina{max-width:1100px;margin:0 auto;padding:1.5rem 1rem 4rem;display:flex;flex-direction:column;gap:1.5rem;position:relative;z-index:1}
+.encabezado{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:1rem;text-align:center; flex-direction:column;}
+.encabezado h1{font-family:var(--fuente-titulo);font-size:clamp(1.6rem,5vw,3rem);font-weight:400;text-shadow:3px 3px 0 var(--amarillo)}
+
+/* ============ 3. STICKERS ============ */
+.sticker{
+  background:var(--papel); border:3px solid var(--tinta); border-radius:14px;
+  box-shadow:5px 5px 0 var(--tinta); padding:1rem 1.2rem; position:relative;
+  transform:rotate(var(--giro,-1deg)); transition:transform .2s;
+}
+.sticker:hover{transform:rotate(0deg) scale(1.02)}
+.sticker.cinta::before{
+  content:""; position:absolute; top:-14px; left:50%; width:70px; height:24px;
+  background:rgba(245,208,97,.9); border:2px solid var(--tinta);
+  transform:translateX(-50%) rotate(3deg);
+}
+.sticker:nth-child(3n+1){--giro:-2deg}
+.sticker:nth-child(3n+2){--giro:1.5deg}
+.sticker:nth-child(3n){--giro:-.5deg}
+
+.hueco-imagen{
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  min-height:90px;border:3px dashed var(--tinta);border-radius:10px;
+  background:rgba(157,126,176,.2);font-size:1rem;
+}
+.hueco-imagen img{max-width:100%;height:auto;display:block}
+
+/* ============ 4. ELEMENTOS FLOTANTES ============ */
+.flotante{position:fixed;z-index:0;pointer-events:none;width:90px;min-height:90px;animation:flotar 6s ease-in-out infinite}
+.flotante.f1{top:12%;left:2%}
+.flotante.f2{top:60%;right:2%;animation-delay:-2s}
+.flotante.f3{bottom:4%;left:8%;animation-delay:-4s}
+@keyframes flotar{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-14px) rotate(4deg)}}
+@media (max-width:700px){.flotante{display:none}}
+
+/* ============ 5. MENÚ PRINCIPAL ============ */
+.menu{display:flex;flex-wrap:wrap;justify-content:center;gap:.8rem}
+.menu button{
+  font:inherit;font-size:1.15rem;cursor:pointer;padding:.6rem 1.2rem;
+  background:var(--papel);border:3px solid var(--tinta);border-radius:999px;
+  box-shadow:4px 4px 0 var(--tinta);transition:transform .15s,box-shadow .15s;
+}
+.menu button:hover{transform:translate(-2px,-2px);box-shadow:6px 6px 0 var(--tinta)}
+.menu button[aria-selected="true"]{background:var(--rojo);color:var(--papel)}
+
+/* ============ 6. SECCIONES ============ */
+.seccion{display:none}
+.seccion.activa{display:block}
+.seccion h2{font-family:var(--fuente-titulo);font-weight:400;font-size:clamp(1.2rem,3.5vw,1.9rem);margin-bottom:1.2rem;text-align:center}
+.intro{text-align:center;margin-bottom:1.2rem}
+.cuadricula{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.6rem;align-items:start}
+details.sticker summary{cursor:pointer;font-weight:bold;list-style:none;display:flex;justify-content:space-between;gap:.5rem}
+details.sticker summary::-webkit-details-marker{display:none}
+details.sticker summary::after{content:"+";font-family:var(--fuente-titulo);color:var(--rojo)}
+details.sticker[open] summary::after{content:"–"}
+details.sticker .contenido{margin-top:.8rem;padding-top:.8rem;border-top:2px dashed var(--tinta);animation:abrir .25s ease-out}
+@keyframes abrir{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.leeme-caja{max-width:620px;margin:0 auto;text-align:center;display:flex;flex-direction:column;gap:1rem;align-items:center;--giro:-1deg}
+#mensaje-texto{font-size:1.5rem;min-height:4rem;display:flex;align-items:center;justify-content:center}
+#mensaje-contador{font-size:.95rem;opacity:.7}
+.carta{perspective:900px;background:none;border:0;box-shadow:none;padding:0;font:inherit;color:inherit;cursor:pointer;text-align:center;min-height:220px;width:100%}
+.carta-interior{position:relative;width:100%;height:100%;min-height:220px;transition:transform .6s;transform-style:preserve-3d}
+.carta.volteada .carta-interior{transform:rotateY(180deg)}
+.cara{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.6rem;padding:1rem;background:var(--papel);border:3px solid var(--tinta);border-radius:14px;box-shadow:5px 5px 0 var(--tinta);}
+.cara.trasera{transform:rotateY(180deg);background:var(--locker);color:var(--papel)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* ============ 7. REPRODUCTOR VINILO ============ */
+.contenedor-reproductor {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--papel);
+  border: 3px solid var(--tinta);
+  border-radius: 30px;
+  padding: 5px 15px 5px 5px;
+  margin-top: 10px;
+  z-index: 10;
+  box-shadow: 4px 4px 0 var(--tinta);
+  cursor: pointer;
+  transition: transform 0.15s;
+}
+.contenedor-reproductor:hover {
+  transform: translate(-2px, -2px);
+}
+.disco-vinilo {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: #111;
+  border: 4px solid #2d1b36;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 4px rgba(255,255,255,0.2);
+}
+.disco-vinilo::after {
+  content: "";
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background: var(--papel);
+  border-radius: 50%;
+  z-index: 5;
+}
+.disco-vinilo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  z-index: 1;
+}
+.girando {
+  animation: girarDisco 2.5s linear infinite;
+}
+@keyframes girarDisco {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+#texto-musica {
+  font-family: var(--fuente-texto);
+  font-size: 1.1rem;
+  font-weight: bold;
+  color: var(--tinta);
+}
+</style>
+</head>
+<body>
+
+<div class="flotante f1" aria-hidden="true"><img src="https://drive.google.com/thumbnail?id=1ZKHSJUjMQfrh5msN-B51zcNKwPG7VZQd&sz=w800" style="width:100%;" referrerpolicy="no-referrer"></div>
+<div class="flotante f2" aria-hidden="true"><img src="https://drive.google.com/thumbnail?id=1UkIHWHCjGuVtpeJbYVJSGwAq-tLzI0jW&sz=w800" style="width:100%;" referrerpolicy="no-referrer"></div>
+<div class="flotante f3" aria-hidden="true"><img src="https://drive.google.com/thumbnail?id=1G_KgNCd1x1AqkXpJNEYm68XcD8EN1CIY&sz=w800" style="width:100%;" referrerpolicy="no-referrer"></div>
+
+<main class="pagina">
+
+  <!-- Reproductor Vinilo -->
+    <div id="btn-musica" class="contenedor-reproductor" aria-label="Reproducir música">
+      <div id="vinilo" class="disco-vinilo">
+        <img id="portada-vinilo" src="" alt="Portada Álbum" referrerpolicy="no-referrer">
+      </div>
+      <span id="texto-musica">Reproduceme</span>
+    </div>
+
+    <!-- === STICKERS FLOTANTES DE FONDO === -->
+    <div class="flotante" aria-hidden="true" style="top: 10%; left: 5%; animation-duration: 8s; width: 90px; position: fixed; z-index: -1;"><img src="https://drive.google.com/thumbnail?id=12be2GXBLMwOnvhfAqn2DYSiRFWNUNwrg&sz=w800" style="width:100%; transform: rotate(-15deg); filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.15));" referrerpolicy="no-referrer"></div>
+    <div class="flotante" aria-hidden="true" style="top: 25%; right: 5%; animation-duration: 12s; width: 80px; position: fixed; z-index: -1;"><img src="https://drive.google.com/thumbnail?id=1tzoJqN0OeDHDYD0-DSFmbrta-ferHyru&sz=w800" style="width:100%; transform: rotate(20deg); filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.15));" referrerpolicy="no-referrer"></div>
+    <div class="flotante" aria-hidden="true" style="top: 50%; left: 2%; animation-duration: 9s; width: 100px; position: fixed; z-index: -1;"><img src="https://drive.google.com/thumbnail?id=1arXZd5yokWVZWB2DFHQYau1d3D0u0r1v&sz=w800" style="width:100%; transform: rotate(-5deg); filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.15));" referrerpolicy="no-referrer"></div>
+    <div class="flotante" aria-hidden="true" style="top: 65%; right: 8%; animation-duration: 14s; width: 85px; position: fixed; z-index: -1;"><img src="https://drive.google.com/thumbnail?id=1mn5t5-l31eopjRI8d5myek8w17o3qdQN&sz=w800" style="width:100%; transform: rotate(12deg); filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.15));" referrerpolicy="no-referrer"></div>
+    <div class="flotante" aria-hidden="true" style="top: 85%; left: 10%; animation-duration: 11s; width: 95px; position: fixed; z-index: -1;"><img src="https://drive.google.com/thumbnail?id=1LcnIhtWi2LXlk7GoX_YrLbzzQhHmiw6w&sz=w800" style="width:100%; transform: rotate(-25deg); filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.15));" referrerpolicy="no-referrer"></div>
+    <div class="flotante" aria-hidden="true" style="top: 40%; right: 15%; animation-duration: 15s; width: 75px; position: fixed; z-index: -1;"><img src="https://drive.google.com/thumbnail?id=1_pNSqcLetsFXpEds4qsac4SqcV-9Leub&sz=w800" style="width:100%; transform: rotate(8deg); filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.15));" referrerpolicy="no-referrer"></div>
+    <div class="flotante" aria-hidden="true" style="top: 15%; right: 25%; animation-duration: 10s; width: 70px; position: fixed; z-index: -1;"><img src="https://drive.google.com/thumbnail?id=1ZKHSJUjMQfrh5msN-B51zcNKwPG7VZQd&sz=w800" style="width:100%; transform: rotate(-10deg); filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.15));" referrerpolicy="no-referrer"></div>
+    <div class="flotante" aria-hidden="true" style="top: 80%; right: 25%; animation-duration: 13s; width: 110px; position: fixed; z-index: -1;"><img src="https://drive.google.com/thumbnail?id=1UkIHWHCjGuVtpeJbYVJSGwAq-tLzI0jW&sz=w800" style="width:100%; transform: rotate(18deg); filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.15));" referrerpolicy="no-referrer"></div>
+
+    <div style="width: 100%; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 1rem; margin-top: 10px;">
+      <div class="sticker" style="width:110px; height:110px; padding: 5px; display:flex; align-items:center; justify-content:center;">
+          <img src="https://drive.google.com/thumbnail?id=1zTAnd3UPuqYqzkNOnMSPjWOL249Zbk9c&sz=w800" alt="Sticker" style="max-width:100%; max-height:100%; object-fit:contain; transform: rotate(-10deg); filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2));" referrerpolicy="no-referrer">
+      </div>
+      
+      <h1><!-- Insertar título aquí --></h1>
+      
+      <div class="sticker" style="width:110px; height:110px; padding: 5px; display:flex; align-items:center; justify-content:center;">
+          <img src="https://drive.google.com/thumbnail?id=1_UfEwFQ3Oh4FzqZl_eYvCn4wbLmbAcS3&sz=w800" alt="Sticker" style="max-width:100%; max-height:100%; object-fit:contain; transform: rotate(15deg); filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2));" referrerpolicy="no-referrer">
+      </div>
+    </div>
+  </header>
+
+  <nav class="menu" role="tablist" aria-label="Menú principal">
+    <button role="tab" id="tab-afecto" aria-controls="afecto" aria-selected="true" data-seccion="afecto">Demostración de Afecto Cuántico</button>
+    <button role="tab" id="tab-leeme" aria-controls="leeme" aria-selected="false" data-seccion="leeme">Léeme</button>
+    <button role="tab" id="tab-aventuras" aria-controls="aventuras" aria-selected="false" data-seccion="aventuras">Planificador de Aventuras</button>
+  </nav>
+
+  <section id="afecto" class="seccion activa" role="tabpanel" aria-labelledby="tab-afecto">
+    <h2>Demostración de Afecto Cuántico</h2>
+    <p class="intro">Datos científicamente comprobados sobre lo que siento por ti 🤓❤️</p>
+
+    <div class="cuadricula">
+      
+      <!-- 1. CÓDIGO BINARIO -->
+      <details class="sticker cinta">
+        <summary>Un mensaje cifrado para ti...</summary>
+        <div class="contenido">
+          <p style="font-family: monospace; word-break: break-word; font-size: 1rem; line-height: 1.4; letter-spacing: 1px; text-align: center;">
+            01001001 00100000 01001100 01101111 01110110 01100101 00100000 01011001 01101111 01110101
+          </p>
+          <p style="margin-top: 10px; font-weight: bold; text-align: center;">means<br><br><span style="font-size: 1.4rem;">I love you in nerd 💻</span></p>
+        </div>
+      </details>
+
+      <!-- 2. QUÍMICA: Cu Te -->
+      <details class="sticker">
+        <summary>Are you made of Copper and Tellurium?</summary>
+        <div class="contenido" style="text-align: center;">
+          <p style="margin-bottom: 15px;">Because you're...</p>
+          <div style="display:flex; justify-content:center; font-family:sans-serif;">
+            <div style="border:3px solid var(--rojo); padding:5px 15px; color:var(--rojo); background: #fff;">
+              <div style="font-size:0.8rem; text-align:left;">29</div>
+              <div style="font-size:2.5rem; font-weight:bold; line-height:1;">Cu</div>
+              <div style="font-size:0.9rem;">Copper</div>
+            </div>
+            <div style="border:3px solid var(--tinta); border-left:none; padding:5px 15px; color:var(--tinta); background: #fff;">
+              <div style="font-size:0.8rem; text-align:left;">52</div>
+              <div style="font-size:2.5rem; font-weight:bold; line-height:1;">Te</div>
+              <div style="font-size:0.9rem;">Tellurium</div>
+            </div>
+          </div>
+        </div>
+      </details>
+
+      <!-- 3. FÓRMULA DEL AMOR (Gráfica de Corazón) -->
+      <details class="sticker cinta">
+        <summary>The Love Formula</summary>
+        <div class="contenido" style="text-align: center;">
+          <p style="font-size: 1.4rem; color: var(--rojo); font-family: 'Comic Sans MS', cursive; margin-bottom: 10px;">
+            <b>x² + (y - ∛x²)² = 1</b>
+          </p>
+          
+          <div style="background: rgba(227,36,63,0.05); padding: 10px; border-radius: 8px; border: 1px dashed var(--rojo);">
+            <p style="font-family: var(--fuente-texto); font-size: 0.95rem; margin-bottom: 8px; color: var(--tinta);">Copia este código y pégalo en <a href="https://www.desmos.com/calculator" target="_blank" style="color: var(--locker); font-weight: bold; text-decoration: none;">Desmos</a> ❤️:</p>
+            
+            <input type="text" readonly value="x^{2}+(y-(x^{2})^{(1/3)})^{2}=10" style="width: 100%; padding: 8px; font-family: monospace; font-size: 1rem; text-align: center; border: 2px solid var(--rojo); border-radius: 5px; cursor: pointer; color: var(--rojo); font-weight: bold; background: #fff;" onclick="this.select();" title="Clic para seleccionar">
+          </div>
+        </div>
+      </details>
+
+     <!-- 4. L O V E (Ecuaciones Limitadas en código LaTeX nativo) -->
+      <details class="sticker">
+        <summary>I hope u will understand...</summary>
+        <div class="contenido" style="text-align: center;">
+          <p style="margin-bottom: 10px; font-family: var(--fuente-texto); font-size: 1.1rem;">(I want to say I love u in every way)</p>
+          
+          <div style="background: rgba(227,36,63,0.05); padding: 10px; border-radius: 8px; border: 1px dashed var(--rojo);">
+            <p style="font-family: var(--fuente-texto); font-size: 0.95rem; margin-bottom: 8px; color: var(--tinta);">Copia este bloque (las 4 líneas juntas) y pégalo en <a href="https://www.desmos.com/calculator" target="_blank" style="color: var(--locker); font-weight: bold; text-decoration: none;">Desmos</a> 😉:</p>
+            
+<textarea readonly style="width: 100%; padding: 8px; font-family: monospace; font-size: 0.85rem; line-height: 1.4; text-align: left; border: 2px solid var(--rojo); border-radius: 5px; cursor: pointer; color: var(--rojo); font-weight: bold; background: #fff; resize: none; overflow: hidden;" rows="4" onclick="this.select();" title="Clic para seleccionar">
+y=\frac{1}{x+8}\left\{0.34&lt;y&lt;7\right\}
+\left(x+2\right)^2+\left(y-3\right)^2=9
+y=\left|-2\left(x-4\right)\right|\left\{y&lt;6.3\right\}
+x=10-3\left|\sin\left(y\right)\right|\left\{0&lt;y&lt;6.3\right\}</textarea>
+          </div>
+        </div>
+      </details>
+      <!-- 5. TABLA PERIÓDICA I Lu V U -->
+      <details class="sticker cinta">
+        <summary>Una suma química sencilla...</summary>
+        <div class="contenido">
+          <div style="display:flex; gap:5px; justify-content:center; margin-bottom:15px; font-family:sans-serif; background: #fff; padding: 10px; border-radius: 8px;">
+            <div style="border:2px solid var(--tinta); padding:2px 8px; text-align:center;">
+              <div style="font-size:0.7rem;">53</div><b style="font-size:1.2rem; color:var(--rojo)">I</b>
+            </div>
+            <div style="border:2px solid var(--tinta); padding:2px 8px; text-align:center;">
+              <div style="font-size:0.7rem;">71</div><b style="font-size:1.2rem; color:var(--rojo)">Lu</b>
+            </div>
+            <div style="border:2px solid var(--tinta); padding:2px 8px; text-align:center;">
+              <div style="font-size:0.7rem;">23</div><b style="font-size:1.2rem; color:var(--rojo)">V</b>
+            </div>
+            <div style="border:2px solid var(--tinta); padding:2px 8px; text-align:center;">
+              <div style="font-size:0.7rem;">92</div><b style="font-size:1.2rem; color:var(--rojo)">U</b>
+            </div>
+          </div>
+          <p style="text-align: center;">Me + You = ❤️<br>Me - You = :(</p>
+        </div>
+      </details>
+
+      <!-- 6. ASTROFÍSICA: Singularity -->
+      <details class="sticker">
+        <summary>En términos astrofísicos...</summary>
+        <div class="contenido" style="text-align: center;">
+          <p style="font-size: 1.3rem; font-weight: bold;">You are my singularity 🌌</p>
+          <p style="font-size: 0.95rem; margin-top: 10px;">(Eres el centro de mi universo donde todas las leyes de la física se rompen).</p>
+        </div>
+      </details>
+
+      <!-- 7. POEMA DE ARTE -->
+      <details class="sticker cinta">
+        <summary>Clases de español contigo...</summary>
+        <div class="contenido" style="font-size: 1.3rem; line-height: 1.4;">
+          <p>Abraz-<span style="color:var(--rojo);">arte</span></p>
+          <p>Am-<span style="color:var(--amarillo);">arte</span></p>
+          <p>Bes-<span style="color:var(--locker);">arte</span></p>
+          <p>Pens-<span style="color:#7b4b94;">arte</span></p>
+          <p>Soñ-<span style="color:#b06ab3;">arte</span></p>
+          <p style="margin-top: 10px; font-weight: bold;">Ves, todo en ti es arte. 🎨</p>
+        </div>
+      </details>
+
+      <!-- 8. TARJETA AMARILLA -->
+      <details class="sticker">
+        <summary>¡Piiii! 🟨 Árbitro...</summary>
+        <div class="contenido" style="text-align: center;">
+          <div style="background: var(--amarillo); border: 3px solid var(--tinta); width: 80px; height: 110px; margin: 0 auto 10px; transform: rotate(5deg); box-shadow: 3px 3px 0 var(--tinta);"></div>
+          <p><b>Tarjeta amarilla...</b><br>¡Por la falta que me haces! ⚽💛</p>
+        </div>
+      </details>
+
+      <!-- 9. CARTAS: Stole my heart -->
+      <details class="sticker cinta">
+        <summary>You stole...</summary>
+        <div class="contenido" style="text-align: center; font-size: 1.4rem;">
+          <p style="margin-bottom: 10px;">♠️ ♦️ 🔲 ♣️</p>
+          <p style="font-family: var(--fuente-texto);">...my heart! 🃏❤️</p>
+        </div>
+      </details>
+
+      <!-- 10. POEMA COLORES -->
+      <details class="sticker">
+        <summary>Mi color favorito es...</summary>
+        <div class="contenido" style="font-size: 1.25rem;">
+          <p>Me gusta el azul 💙</p>
+          <p>Me gusta el rojo ❤️</p>
+          <p style="margin-top: 10px; font-weight: bold;">Pero más me gusta el color de tus bellos ojos. 👁️✨</p>
+        </div>
+      </details>
+      
+    </div>
+  </section>
+
+<!-- ===== SECCIÓN 2: LÉEME ===== -->
+  <section id="leeme" class="seccion" role="tabpanel" aria-labelledby="tab-leeme">
+    <h2>Botón de Apapacho Automático</h2>
+
+    <div class="leeme-caja sticker cinta">
+      <!-- Sticker dinámico para los mensajes -->
+      <div style="width:120px; height:120px; margin: 0 auto 15px; display:flex; align-items:center; justify-content:center;">
+          <img id="sticker-apapacho" src="https://drive.google.com/thumbnail?id=16B0xqfFM7b_iCZfGC9rjiFIC5FDfQOVK&sz=w800" alt="Sticker" style="max-width:100%; max-height:100%; object-fit:contain; filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2)); transition: transform 0.3s ease;" referrerpolicy="no-referrer">
+      </div>
+      
+      <!-- El JavaScript escribe aquí el mensaje elegido -->
+      <p id="mensaje-texto" aria-live="polite"></p>
+      <p id="mensaje-contador" style="margin-top: 15px;"></p>
+    </div>
+  </section>
+
+<!-- ===== SECCIÓN 3: BUSCADOR DE CITAS ===== -->
+  <section id="aventuras" class="seccion" role="tabpanel" aria-labelledby="tab-aventuras">
+    <h2>Buscador de Aventuras</h2>
+    <p class="intro">Responde estas preguntas para descubrir nuestro plan de hoy 🕵️‍♂️✨</p>
+
+    <div class="sticker cinta" style="max-width: 600px; margin: 0 auto; min-height: 200px;">
+      
+      <!-- Contenedor de las preguntas -->
+      <div id="quiz-preguntas">
+        <p id="pregunta-texto" style="font-size: 1.4rem; font-weight: bold; text-align: center; margin-bottom: 15px;"></p>
+        <div id="opciones-contenedor" style="display: flex; flex-direction: column; gap: 10px;"></div>
+      </div>
+      
+      <!-- Contenedor del resultado -->
+      <div id="quiz-resultado" style="display: none; text-align: center;">
+        <h3 style="margin-bottom: 15px; font-family: var(--fuente-titulo); font-size: 1.2rem;">¡Tenemos un plan!</h3>
+        
+        <!-- Tarjeta reveladora blindada -->
+        <div style="width: 260px; height: 320px; margin: 0 auto 20px; perspective: 900px;">
+          <button class="carta" id="carta-resultado" aria-pressed="false" style="width: 100%; height: 100%; margin: 0; padding: 0; outline: none; border: none; background: transparent; cursor: pointer; -webkit-tap-highlight-color: transparent;">
+            <span class="carta-interior" style="position: relative; width: 100%; height: 100%; transition: transform 0.6s; transform-style: preserve-3d; display: block;">
+              
+              <!-- Cara Frontal -->
+              <span class="cara frontal" style="width: 100%; height: 100%; position: absolute; inset: 0; backface-visibility: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--papel); border: 3px solid var(--tinta); border-radius: 14px; box-shadow: 5px 5px 0 var(--tinta); padding: 15px;">
+                <div style="width: 100%; height: 160px; border-radius: 8px; border: 2px solid var(--tinta); background: rgba(157,126,176,.2); display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                  <img id="img-resultado" src="" alt="Cita" style="width: 100%; height: 100%; object-fit: cover; display: none;" onload="this.style.display='block'" referrerpolicy="no-referrer">
+                </div>
+                <p style="font-weight: bold; margin-top: 15px; font-size: 1.2rem;">Toca para ver el plan</p>
+              </span>
+
+              <!-- Cara Trasera -->
+              <span class="cara trasera" style="width: 100%; height: 100%; position: absolute; inset: 0; backface-visibility: hidden; transform: rotateY(180deg); display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--locker); color: var(--papel); border: 3px solid var(--tinta); border-radius: 14px; box-shadow: 5px 5px 0 var(--tinta); padding: 20px;">
+                <h3 id="resultado-titulo" style="margin-bottom: 10px; font-size: 1.3rem;"></h3>
+                <p id="resultado-desc" style="font-size: 1rem; line-height: 1.3;"></p>
+              </span>
+
+            </span>
+          </button>
+        </div>
+        
+        <button id="btn-reiniciar" style="font-family: var(--fuente-texto); font-size: 1rem; padding: 5px 15px; border-radius: 20px; border: 2px solid var(--tinta); background: var(--amarillo); cursor: pointer;">Hacer otro test</button>
+      </div>
+
+    </div>
+  </section>
+</main>
+
+<script>
+/* ============ A. DATOS: LOS 200 MENSAJES ============ */
+const MENSAJES = [
+  "Respira profundo, mi amor, aquí estoy contigo.",
+  "Si estuviera ahí, te daría el abrazo más apretado del mundo.",
+  "Está bien no sentirse bien hoy; mañana será un día mejor.",
+  "Cierra los ojos e imagina que te estoy abrazando justo ahora.",
+  "No importa qué tan pesado sea el día, juntos somos más fuertes.",
+  "Llora si lo necesitas, yo me encargo de secar tus lágrimas.",
+  "Eres mi lugar seguro, déjame ser el tuyo hoy.",
+  "Todo pasa, mi niña, y esto también va a pasar.",
+  "Toma un vasito de agua, respira y recuerda que te amo.",
+  "Estoy a solo un mensaje o una llamada de distancia, a la hora que sea.",
+  "Cuando el mundo haga mucho ruido, ven a esconderte conmigo.",
+  "Sé que estás cansada, pero estoy muy orgulloso de ti.",
+  "Quisiera poder quitarte esa tristeza y ponérmela yo.",
+  "Ningún día malo va a cambiar lo maravillosa que eres.",
+  "Permítete descansar hoy; no tienes que ser perfecta todo el tiempo.",
+  "Te mando un besito en la frente para calmar tus pensamientos.",
+  "Ojalá pudieras verte a través de mis ojos para que veas lo increíble que eres.",
+  "Eres mucho más grande que cualquier problema que estés enfrentando.",
+  "Siempre voy a estar en tu esquina, pase lo que pase.",
+  "Hasta en tus días más grises, iluminas mi vida.",
+  "No tienes que cargar con todo tú sola, divídelo conmigo.",
+  "Tómate cinco minutos para ti, te los mereces.",
+  "Me duele verte triste, pero me encanta poder acompañarte a sanar.",
+  "Eres mi prioridad, hoy y siempre.",
+  "Si necesitas hablar, te escucho. Si prefieres silencio, me quedo callado a tu lado.",
+  "Recuerda que después de una tormenta siempre sale el sol.",
+  "Eres lo más valiente que conozco.",
+  "Un día malo no define la vida hermosa que estamos construyendo.",
+  "Te amo en tus días buenos, pero te amo aún más en tus días difíciles.",
+  "Eres suficiente, exactamente como eres.",
+  "No dejes que este momento te haga dudar de tu valor.",
+  "Mírate al espejo y sonríe, quiero que veas a la niña que me enamora todos los días.",
+  "Aquí tienes un apapacho virtual hasta que te vea.",
+  "Cada vez que respires, suelta un poquito de ese estrés.",
+  "Estoy pensando en ti justo en este momento.",
+  "Mi vida es mucho más bonita desde que tú estás en ella.",
+  "No te rindas, sé cuánto te has esforzado.",
+  "Eres mi heroína, incluso cuando te sientes vulnerable.",
+  "Descansa esa cabecita, yo cuido tus sueños.",
+  "Todo va a estar bien, te lo prometo.",
+  "Me haces el niño más feliz del universo.",
+  "Elegirte fue la decisión más fácil de mi vida.",
+  "Me enamoro de ti un poquito más cada día que pasa.",
+  "Tu risa es mi sonido favorito en todo el mundo.",
+  "No hay nadie más con quien prefiera compartir mi vida.",
+  "Eres la casualidad más bonita que me ha pasado.",
+  "Si pudiera repetir mi vida, te buscaría más temprano.",
+  "Me encantan hasta las cosas que tú crees que son defectos.",
+  "Contigo todo es mejor, incluso no hacer nada.",
+  "Haces que lo ordinario se sienta extraordinario.",
+  "Eres la dueña de todos mis pensamientos.",
+  "Mi parte favorita del día es cuando por fin te veo.",
+  "Nadie me entiende como tú lo haces.",
+  "Tienes el corazón más bonito que he conocido.",
+  "Me haces querer ser una mejor persona cada día.",
+  "Qué suerte la mía de poder llamarte mi novia.",
+  "Haces que mi mundo gire a un ritmo perfecto.",
+  "Eres el \"para siempre\" que siempre quise.",
+  "Eres mi confidente y mi mejor amiga.",
+  "Amo la forma en que tus ojos brillan cuando hablas de lo que te gusta.",
+  "Gracias por enseñarme lo que es el amor de verdad.",
+  "Eres mi hogar, sin importar en dónde estemos.",
+  "Amo cada pequeño detalle que te hace ser tú.",
+  "Si el amor fuera tiempo, te daría toda mi eternidad.",
+  "Me traes una paz que no sabía que necesitaba.",
+  "Haces que las mariposas en mi estómago no se vayan nunca.",
+  "Me encanta cómo encajan nuestras manos.",
+  "Me pasaría la vida entera viéndote sonreír.",
+  "Haces que mi corazón lata mil por hora.",
+  "Contigo he aprendido a amar sin miedos.",
+  "Eres mi poema favorito.",
+  "Nunca me voy a cansar de decirte lo hermosa que eres.",
+  "Eres el sueño del que nunca quiero despertar.",
+  "Amo cómo tu voz me calma de inmediato.",
+  "No cambiaría absolutamente nada de ti.",
+  "Me tienes completamente loco por ti.",
+  "Tú le das color a mis días más aburridos.",
+  "Eres todo lo que siempre busqué y no sabía que existía.",
+  "Quiero ser la razón por la que sonríes hoy.",
+  "Eres el amor de mi vida, hoy, mañana y siempre.",
+  "\"Odio cuando me haces reír, y aún peor cuando me haces llorar...\" Pero odio no poder odiarte, ni siquiera un poco.",
+  "Eres más increíble que cualquier banda tocando en el techo de la escuela.",
+  "Como diría Snoopy: \"Mantén la vista al frente y sigue caminando\". Yo camino a tu lado.",
+  "Abrazarte es mejor que cualquier siesta sobre el techo de una casa de perro roja.",
+  "Odio la forma en que me lees la mente, pero amo cómo me conoces mejor que nadie.",
+  "Eres la Woodstock de mi Snoopy: indispensable y mi compañera de aventuras.",
+  "Me encanta tu sonrisa, mucho más que a Charlie Brown le gusta la niña del cabello rojo.",
+  "Odio no tenerte cerca en este preciso momento.",
+  "Como dice Linus, de todas las cosas en el mundo, estar contigo es mi manta de seguridad.",
+  "Eres mi película romántica favorita en la vida real.",
+  "No necesito un poema de 10 cosas que odio sobre ti, porque tengo un millón de cosas que amo de ti.",
+  "A veces la vida es como que te quiten el balón en el último segundo, pero siempre te ayudaré a levantarte.",
+  "Eres la chica más genial de toda la preparatoria.",
+  "Odio que no estés sonriendo justo ahora, por favor sonríe por mí.",
+  "Ser tu novio es mucho mejor que ganar cualquier concurso al chico más popular.",
+  "Si Snoopy tiene a su máquina de escribir para contar historias, yo te tengo a ti para vivir la mía.",
+  "No hay ninguna barrera que me impida estar contigo, ni siquiera si tengo que pagarle a alguien para salir contigo (es broma, lo haría gratis).",
+  "Un abrazo tuyo cura más rápido que cualquier consejo del stand psiquiátrico de Lucy.",
+  "Contigo cada día se siente como un cómic de domingo: feliz y a color.",
+  "Odio cuando te sientes mal, pero amo ser quien te cuida.",
+  "Eres una chingona, no se te olvide. Y si se te olvida, aquí estoy yo para recordártelo todos los días.",
+  "Odio que a veces no veas lo increíble que eres, pero me encanta tener el trabajo de recordártelo.",
+  "Eres como Snoopy cuando se pone sus lentes de Joe Cool: imparable, segura y la más genial del mundo.",
+  "Ni Patrick Verona cantando en las gradas frente a toda la escuela se compara con lo mucho que te amo.",
+  "Si Snoopy puede pelear contra el Barón Rojo, tú puedes con cualquier reto de hoy. ¡Te la rifas!",
+  "Odio cuando te estresas, pero amo ver cómo al final siempre lo resuelves porque eres muy cabrona para lo que haces.",
+  "Eres más reconfortante y segura para mí que la cobijita de Linus en un día de tormenta.",
+  "Recuerda que no hay nada que no puedas lograr. Eres mi persona favorita y la más capaz que conozco.",
+  "Odio la idea de que alguien te haga dudar de ti misma, porque eres perfecta y talentosísima tal y como eres.",
+  "Te amo muchísimo más de lo que Snoopy ama la hora de su cena.",
+  "No tienes que fingir que todo está bien siempre, pero ten por seguro que eres una chingona y vas a salir de esta.",
+  "Sería capaz de jugar gotcha y dejar que me llenes de pintura todos los días solo por verte sonreír como en la película.",
+  "Eres la Woodstock de mi vida, mi acompañante perfecta, mi cómplice y la única persona con la que quiero volar.",
+  "Odio no poder estar ahí para abrazarte ahora mismo, pero te mando toda mi buena vibra y mi amor.",
+  "Si alguna vez te sientes pequeña, mírate a través de mis ojos para que veas a la mujer tan inmensa y admirable que eres.",
+  "Como diría Charlie Brown: \"La felicidad es tener a alguien como tú\". Gracias por hacerme el más feliz.",
+  "Tienes una luz tan cabrona que iluminas hasta mis días más oscuros y pesados.",
+  "Eres mi poema de \"10 cosas que amo sobre ti\", y no le cambiaría ni una sola letra.",
+  "Hasta cuando sientes que el mundo entero está en tu contra, quiero que sepas que yo siempre seré tu equipo.",
+  "Snoopy dice que la vida es mejor con un amigo fiel, y yo me gané la lotería teniendo a mi mejor amiga y al amor de mi vida en la misma persona.",
+  "Eres hermosa, súper inteligente y una verdadera chingona. Que el mundo se agarre porque hoy vas con todo.",
+  "Odio cuando te exiges demasiado. Recuerda que también se vale descansar y que mi orgullo por ti no cambia.",
+  "Tienes una mente tan brillante y una personalidad tan genial que haces que todos los demás parezcan aburridos.",
+  "Odio la forma en que me haces extrañarte cuando no estás, pero amo saber que siempre nos volvemos a encontrar.",
+  "Ni todas las canciones rebeldes y románticas de los 90 pueden explicar lo muchísimo que me fascinas.",
+  "Aunque hoy te sientas como Charlie Brown cuando no logra patear el balón, para mí siempre eres y serás la campeona.",
+  "Admiro tu forma de ser, tu forma de pensar y esa fuerza tan tuya para salir adelante siempre.",
+  "Eres mi rincón de paz en la Tierra, mi techo de la casita de Snoopy para ver las estrellas cuando todo es un caos.",
+  "Nunca dejes que el síndrome del impostor te hable. Eres una riata en lo que haces y yo soy tu fan número uno.",
+  "Pase lo que pase hoy, recuerda que te admiro muchísimo y que para mí, no hay nadie más chingona que tú.",
+  "Eres la mujer más capaz e inteligente que conozco.",
+  "No dejes que el síndrome del impostor te gane, eres buenísima en lo que haces.",
+  "Tienes una luz que nadie más tiene, nunca dejes que se apague.",
+  "Admiro muchísimo tu determinación, eres una guerrera.",
+  "Sé que puedes lograr cualquier cosa que te propongas.",
+  "Tu talento y tu creatividad me sorprenden todos los días.",
+  "Has superado el 100% de tus días malos. Este es solo uno más, tú puedes.",
+  "Eres magia pura, no dejes que nadie te convenza de lo contrario.",
+  "El mundo es mucho mejor porque tú estás en él, haciendo tu parte.",
+  "Creo en ti más de lo que creo en la gravedad.",
+  "Eres un ejemplo de resiliencia para mí, qué bárbara eres.",
+  "Tienes una mente brillante, úsala para conquistar hoy.",
+  "No hay obstáculo que sea más grande que tu voluntad, eres inmensa.",
+  "Estoy seguro de que vas a triunfar en todo lo que hagas porque eres una chingona.",
+  "Tu esfuerzo siempre vale la pena, aunque hoy no veas los resultados.",
+  "Eres fuego y puedes contra cualquier tormenta.",
+  "Me inspira ver cómo luchas por tus sueños y no te rindes.",
+  "Nunca dudes de tu capacidad para brillar, naciste para cosas grandes.",
+  "Tienes el poder de cambiar tu día en este instante.",
+  "Eres un diamante, la presión solo te hace brillar más fuerte.",
+  "Estoy aplaudiendo todos tus logros, incluso los más pequeños.",
+  "Eres la protagonista de tu propia historia, y es una historia increíble.",
+  "Cada paso que das te acerca a donde quieres estar.",
+  "Eres dueña de un potencial infinito, nunca lo dudes.",
+  "Confío ciegamente en tu talento y en tu corazón.",
+  "Rompe tus propios límites hoy, demuestra de qué estás hecha.",
+  "Eres una fuerza de la naturaleza.",
+  "Tu opinión importa, tu voz importa, tú importas muchísimo.",
+  "Quédate tranquila sabiendo que diste lo mejor de ti y eres una crack.",
+  "Estoy ridículamente orgulloso de ti, hoy y siempre.",
+  "Te extraño muchísimo.",
+  "Eres mi loquita favorita.",
+  "Me encantas, punto final.",
+  "Todo de ti me vuelve loco.",
+  "Gracias por existir.",
+  "Eres mi niña preciosa.",
+  "Te pienso a cada segundo.",
+  "Qué bonita eres, por dentro y por fuera.",
+  "Te amo de aquí a la luna (y de regreso).",
+  "Siempre tú.",
+  "Te mando mil besos.",
+  "Mi corazón es todo tuyo.",
+  "Sonríe, me fascina verte así.",
+  "Eres mi mejor regalo.",
+  "Me haces muy bien.",
+  "Eres mi \"buenos días\" favorito.",
+  "Te adoro, preciosa.",
+  "Contigo todo fluye mejor.",
+  "Eres dueña de mi corazón.",
+  "Quiero verte ya.",
+  "Nunca me faltes.",
+  "Eres mi media naranja.",
+  "Me derrito por ti.",
+  "Nadie se compara contigo.",
+  "Tienes la sonrisa más bella.",
+  "Eres simplemente perfecta.",
+  "Te elijo todos los días.",
+  "Tú y yo contra el mundo.",
+  "Eres mi solcito.",
+  "Me haces suspirar.",
+  "Eres arte puro.",
+  "Mi vida es tuya.",
+  "Pienso en ti y sonrío.",
+  "Qué guapa estás hoy (seguro).",
+  "Eres luz en mi vida.",
+  "Amarte es facílisimo.",
+  "Te amo, chiquita.",
+  "Eres mi consentida.",
+  "Me tienes a tus pies.",
+  "Te amo, hoy más que ayer."
+];
+
+/* ============ B. NAVEGACIÓN ENTRE SECCIONES ============ */
+const pestanas = document.querySelectorAll('.menu button');
+const secciones = document.querySelectorAll('.seccion');
+
+function mostrarSeccion(id){
+  secciones.forEach(s => s.classList.toggle('activa', s.id === id));
+  pestanas.forEach(p => p.setAttribute('aria-selected', p.dataset.seccion === id));
+  if (id === 'leeme') mostrarMensajeNuevo();
+}
+pestanas.forEach(p => p.addEventListener('click', () => mostrarSeccion(p.dataset.seccion)));
+
+/* ============ C. ROTACIÓN DE MENSAJES (LÉEME) ============ */
+const TODOS_LOS_STICKERS = [
+  "https://drive.google.com/thumbnail?id=12be2GXBLMwOnvhfAqn2DYSiRFWNUNwrg&sz=w800",
+  "https://drive.google.com/thumbnail?id=1tzoJqN0OeDHDYD0-DSFmbrta-ferHyru&sz=w800",
+  "https://drive.google.com/thumbnail?id=1arXZd5yokWVZWB2DFHQYau1d3D0u0r1v&sz=w800",
+  "https://drive.google.com/thumbnail?id=1mn5t5-l31eopjRI8d5myek8w17o3qdQN&sz=w800",
+  "https://drive.google.com/thumbnail?id=1LcnIhtWi2LXlk7GoX_YrLbzzQhHmiw6w&sz=w800",
+  "https://drive.google.com/thumbnail?id=1_pNSqcLetsFXpEds4qsac4SqcV-9Leub&sz=w800",
+  "https://drive.google.com/thumbnail?id=16B0xqfFM7b_iCZfGC9rjiFIC5FDfQOVK&sz=w800",
+  "https://drive.google.com/thumbnail?id=1ZKHSJUjMQfrh5msN-B51zcNKwPG7VZQd&sz=w800",
+  "https://drive.google.com/thumbnail?id=1VbZWy1gVfB-LfGTnwfkId4PTX39fqvRT&sz=w800",
+  "https://drive.google.com/thumbnail?id=1ooZAIJNxD_EBPkX4_ilrLZB5i5uiIlQo&sz=w800",
+  "https://drive.google.com/thumbnail?id=1bCU9gtUzKw_q6WAKD_MwKrinjvLCWqno&sz=w800",
+  "https://drive.google.com/thumbnail?id=1_UfEwFQ3Oh4FzqZl_eYvCn4wbLmbAcS3&sz=w800",
+  "https://drive.google.com/thumbnail?id=1Kn-NVT9ei2XXkNFtMZiZ4wiul_lPl94m&sz=w800",
+  "https://drive.google.com/thumbnail?id=1eVg5Re0geC4NAAL6-5Opeb8KaFCHk8q7&sz=w800",
+  "https://drive.google.com/thumbnail?id=14eSf7uq0JIxjP8118RnJO6k0kxEI4NDt&sz=w800",
+  "https://drive.google.com/thumbnail?id=1HJI2XwIqfZFTmL76Ae6URkFR4x5aVhj1&sz=w800",
+  "https://drive.google.com/thumbnail?id=1x-quTu6T_8X_RNQO1myYhord0WukOErQ&sz=w800",
+  "https://drive.google.com/thumbnail?id=1CxJ6_mmMhuMWrrG-mXb4aqG5C7x65tmo&sz=w800",
+  "https://drive.google.com/thumbnail?id=1BbKkGmDkK86aJEro-0fG4A651y-hQ0A6&sz=w800",
+  "https://drive.google.com/thumbnail?id=1cHyE8yAGLorNWZ0lJfnqltNjnRivVPfp&sz=w800",
+  "https://drive.google.com/thumbnail?id=1uHlHcuGwNchTmljyRqrPJDgB7h5wuV3L&sz=w800",
+  "https://drive.google.com/thumbnail?id=1zTAnd3UPuqYqzkNOnMSPjWOL249Zbk9c&sz=w800",
+  "https://drive.google.com/thumbnail?id=1x4P_tfAkDJhy8JUO6KVq4SlJt_GmMrCy&sz=w800",
+  "https://drive.google.com/thumbnail?id=1TEFkk4vSRaihnQ0PrNxTPRfdQokqSHLd&sz=w800",
+  "https://drive.google.com/thumbnail?id=1fVNbbVrUxY5iJoBDaR4yzn3N-bMPlAtV&sz=w800",
+  "https://drive.google.com/thumbnail?id=1-RYozfVo8r78Yd7O4Q0nqs7xoT5F0TeR&sz=w800",
+  "https://drive.google.com/thumbnail?id=1E1qlwS1BPJaL_IZkE9ptXPfqUFWb8L8G&sz=w800",
+  "https://drive.google.com/thumbnail?id=1PhAkheC44f0wDeRU5oeZM6-E6NZ493Rx&sz=w800",
+  "https://drive.google.com/thumbnail?id=1lguxPUZinYNZoyQVbUO_i9J4yCg2coDv&sz=w800",
+  "https://drive.google.com/thumbnail?id=1p4C0rOMsoS5_B3EbuuEZlhZodAa-BQz7&sz=w800",
+  "https://drive.google.com/thumbnail?id=1CXhAFoEQEVg4xkEV3Ky0Na80aaXnKQ8n&sz=w800",
+  "https://drive.google.com/thumbnail?id=16pb6W_qOUMnybgU-hURbAzfPbYv2gMTY&sz=w800",
+  "https://drive.google.com/thumbnail?id=1kQYD8ZmqHtI1kVOqgljawTjPPOwTXTGA&sz=w800",
+  "https://drive.google.com/thumbnail?id=1lNFJLA0QSIjioVktg1YR1BCuHdRCyShZ&sz=w800",
+  "https://drive.google.com/thumbnail?id=1-CsaQcY3OyWTW0ry0oVW8Kly0_STX433&sz=w800",
+  "https://drive.google.com/thumbnail?id=1C1UZe6m3Xv6F575K_2MK-dpo18xnBCWB&sz=w800",
+  "https://drive.google.com/thumbnail?id=1G9HyFnXZ9sDwooNOQ3GfnjluC0lpBPZY&sz=w800",
+  "https://drive.google.com/thumbnail?id=1G_KgNCd1x1AqkXpJNEYm68XcD8EN1CIY&sz=w800",
+  "https://drive.google.com/thumbnail?id=1hv3S5eB2OwyHF7IwMQ8dk7EPLIQcFaEL&sz=w800",
+  "https://drive.google.com/thumbnail?id=1s7cpW2z18Jk1eI-ipLvVgjc0EGQQ1UQD&sz=w800",
+  "https://drive.google.com/thumbnail?id=1UkIHWHCjGuVtpeJbYVJSGwAq-tLzI0jW&sz=w800"
+];
+const CLAVE = 'scrapbook_cola_mensajes';
+let colaMemoria = null;
+let ultimoIndice = -1;
+
+function barajar(n){
+  const lista = Array.from({length:n}, (_, i) => i);
+  for (let i = n - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [lista[i], lista[j]] = [lista[j], lista[i]];
+  }
+  return lista;
+}
+function leerCola(){
+  try { return JSON.parse(localStorage.getItem(CLAVE)); } catch(e){ return colaMemoria; }
+}
+function guardarCola(cola){
+  colaMemoria = cola;
+  try { localStorage.setItem(CLAVE, JSON.stringify(cola)); } catch(e){ }
+}
+
+function siguienteIndice(){
+  let cola = leerCola();
+  if (!Array.isArray(cola) || cola.length === 0 || cola.some(i => i >= MENSAJES.length)){
+    cola = barajar(MENSAJES.length);
+    if (cola.length > 1 && cola[cola.length - 1] === ultimoIndice){
+      [cola[0], cola[cola.length - 1]] = [cola[cola.length - 1], cola[0]];
+    }
+  }
+  const indice = cola.pop();
+  guardarCola(cola);
+  ultimoIndice = indice;
+  return indice;
+}
+
+function mostrarMensajeNuevo(){
+  const texto = document.getElementById('mensaje-texto');
+  const contador = document.getElementById('mensaje-contador');
+  if (MENSAJES.length === 0){
+    texto.textContent = 'Aún no hay mensajes: agrégalos al array MENSAJES.';
+    contador.textContent = '';
+    return;
+  }
+  const i = siguienteIndice();
+  texto.textContent = MENSAJES[i];
+  contador.textContent = 'Mensaje ' + (i + 1) + ' de ' + MENSAJES.length;
+  
+  // Lógica de sticker aleatorio
+  const stickerImg = document.getElementById('sticker-apapacho');
+  if(stickerImg) {
+      const stickerAleatorio = TODOS_LOS_STICKERS[Math.floor(Math.random() * TODOS_LOS_STICKERS.length)];
+      stickerImg.src = stickerAleatorio;
+      const angulo = Math.floor(Math.random() * 30) - 15; 
+      stickerImg.style.transform = `rotate(${angulo}deg) scale(1.05)`;
+      setTimeout(() => stickerImg.style.transform = `rotate(${angulo}deg) scale(1)`, 150);
+  }
+}
+
+/* ============ D. QUIZ DE CITAS ============ */
+const PREGUNTAS_QUIZ = [
+  {
+    pregunta: "¿Qué vibra traes hoy?",
+    opciones: [
+      { texto: "Ganas de aire libre, pasto y un día soleado ☀️", perfil: "naturaleza" },
+      { texto: "Ganas de estar calientitos, cómodos y en pijama 🛋️", perfil: "casera" },
+      { texto: "Ganas de salir a explorar la ciudad y caminar 🏙️", perfil: "calle" }
+    ]
+  },
+  {
+    pregunta: "¿Qué se te antoja comer?",
+    opciones: [
+      { texto: "Un platillo gourmet sorpresa preparado por mí al aire libre 👨‍🍳", perfil: "naturaleza" },
+      { texto: "Cocinar algo juntos en casa o pedir una buena pizza 🍕", perfil: "casera" },
+      { texto: "Ir por un postre, café helado o churros a un lugar bonito ☕", perfil: "calle" }
+    ]
+  },
+  {
+    pregunta: "¿Cuál es tu escenario ideal para hoy?",
+    opciones: [
+      { texto: "Sentarnos en un mantel, remar o jugar gotcha 🛶", perfil: "naturaleza" },
+      { texto: "Mascarillas, armar legos o ver pelis de Snoopy/Dr. Seuss 🎬", perfil: "casera" },
+      { texto: "Pintar cerámica, escoger libros o ver luces de la ciudad 🎨", perfil: "calle" }
+    ]
+  }
+];
+const IDEAS_CITAS = {
+  "naturaleza": [
+    { titulo: "El Picnic Sorpresa 🧺", desc: "Tu platillo favorito preparado por mí, en Parque La Mexicana o Chapultepec. Pasto, solecito y nosotros.", imagen: "https://drive.google.com/thumbnail?id=1OYvPvRX7D0a4i9kXp8zbiKpwjNUScojn&sz=w800" },
+    { titulo: "Escape Botánico 🌿", desc: "Caminata relajada entre plantas exóticas en el Invernadero de la Biblioteca Vasconcelos o el Jardín Botánico UNAM.", imagen: "https://drive.google.com/thumbnail?id=1no_h4ZZsLLDGfYpETByzVLBnaxh2TANA&sz=w800" },
+    { titulo: "Cita Lightyear 🌌", desc: "Proyección del universo y las estrellas en el Planetario Luis Enrique Erro o Universum.", imagen: "https://drive.google.com/thumbnail?id=1-YfWSfOKlNjS83rUpCPomPrnTfQpyhNO&sz=w800" },
+    { titulo: "Gotcha 10 Cosas que Odio Sobre Ti 💥", desc: "Tarde de adrenalina y pintura. Prometo dejarte ganar (o al menos intentarlo).", imagen: "https://drive.google.com/thumbnail?id=1M6Xs7VvpJvn1UcDFajmiyU8grXNaBVO9&sz=w800" },
+    { titulo: "Remando Juntos 🛶", desc: "Rentar una lancha en el Lago de Chapultepec, platicar a solas en el agua y salir por unos snacks.", imagen: "https://drive.google.com/thumbnail?id=12H6K_8ZUkJCRU9ab4Z1w-dbmEhZR2AAY&sz=w800" }
+  ],
+  "casera": [
+    { titulo: "Tarde de Dr. Seuss 🥞", desc: "Quedarnos en casa preparando botanas de colores locos y ver películas súper cómodos.", imagen: "https://drive.google.com/thumbnail?id=1OuESkaWpTXshm35XGwpxNQqTz3c9h2UO&sz=w800" },
+    { titulo: "Laboratorio Gastronómico 👨‍🍳", desc: "Nos ponemos los delantales, elegimos una receta desde cero y cocinamos juntos con buena música.", imagen: "https://drive.google.com/thumbnail?id=1phaGc51OIxP4toKQIbAQ7hIATvfCfgN4&sz=w800" },
+    { titulo: "Tarde de Spa y Snoopy 🧖‍♀️", desc: "Mascarillas faciales, un buen té o frappé, y maratón de clásicos de Charlie Brown en el sillón.", imagen: "https://drive.google.com/thumbnail?id=1033cafTxceH2R0IzBrpx-vHzoFmQkJAg&sz=w800" },
+    { titulo: "Cita de Construcción 🧩", desc: "Pedir una buena pizza a domicilio y armar juntos un rompecabezas 3D de madera o un set de Lego.", imagen: "https://drive.google.com/thumbnail?id=17Ci1q3OcYI5X3M4DfZ9ZAGIUZd8yi3UU&sz=w800" }
+  ],
+  "calle": [
+    { titulo: "Cita Carpe Diem 📚", desc: "Vamos a la Cafebrería El Péndulo. Tenemos 20 mins para escogernos un libro sorpresa y leer el inicio con un postre.", imagen: "https://drive.google.com/thumbnail?id=1-UdHlKqfGPfj6Rq2B-1dl-R8BofB1Myw&sz=w800" },
+    { titulo: "Atardecer de Bellas Artes ☕", desc: "Un café helado en la terraza del piso 8 (Sears) con la mejor vista de la ciudad al atardecer.", imagen: "https://drive.google.com/thumbnail?id=1lNM-6uuSLFT_PgWVD5ISLeTU6mN9oXW9&sz=w800" },
+    { titulo: "Noche Retro en Maquinitas 🕹️", desc: "Competir en el air hockey y básquetbol en Arena The Place to Play. El que pierda invita la cena.", imagen: "https://drive.google.com/thumbnail?id=19RfYn8mrx7ZMquwGnQJ2vo-UwxrkZtq-&sz=w800" },
+    { titulo: "Taller de Cerámica Woodstock 🎨", desc: "Vamos a la sucursal de Clayzie a pintar unas tazas mientras platicamos. ¡Yo invito!", imagen: "https://drive.google.com/thumbnail?id=1498JwYcGXh9s5ByWCH5fXLjSpdarRZlH&sz=w800" },
+    { titulo: "Altura y Churros 🏙️", desc: "Subir al mirador del Monumento a la Revolución, y bajar por unos churros de El Moro.", imagen: "https://drive.google.com/thumbnail?id=1vyOaS-xXnsIxr_CWRooIlgkKm6t8NofN&sz=w800" }
+  ]
+};
+
+let puntajes = { casera: 0, naturaleza: 0, calle: 0 };
+let preguntaActual = 0;
+
+const contPreguntas = document.getElementById('quiz-preguntas');
+const contResultado = document.getElementById('quiz-resultado');
+const textoPregunta = document.getElementById('pregunta-texto');
+const contOpciones = document.getElementById('opciones-contenedor');
+const resTitulo = document.getElementById('resultado-titulo');
+const resDesc = document.getElementById('resultado-desc');
+const cartaResultado = document.getElementById('carta-resultado');
+const imgResultado = document.getElementById('img-resultado');
+
+function cargarPregunta() {
+  if (preguntaActual >= PREGUNTAS_QUIZ.length) {
+    mostrarResultadoQuiz();
+    return;
+  }
+  const q = PREGUNTAS_QUIZ[preguntaActual];
+  textoPregunta.textContent = q.pregunta;
+  contOpciones.innerHTML = '';
+  
+  q.opciones.forEach(opc => {
+    const btn = document.createElement('button');
+    btn.textContent = opc.texto;
+    btn.style.cssText = 'font-family: inherit; font-size: 1.1rem; padding: 10px; border: 2px solid var(--tinta); border-radius: 8px; background: var(--papel); cursor: pointer; text-align: left; transition: transform 0.1s; margin-bottom: 5px;';
+    btn.onmouseover = () => btn.style.transform = 'translateY(-2px)';
+    btn.onmouseout = () => btn.style.transform = 'none';
+    
+    btn.onclick = () => {
+      puntajes[opc.perfil]++;
+      preguntaActual++;
+      cargarPregunta();
+    };
+    contOpciones.appendChild(btn);
+  });
+}
+
+function mostrarResultadoQuiz() {
+  contPreguntas.style.display = 'none';
+  contResultado.style.display = 'block';
+  
+  let perfilGanador = Object.keys(puntajes).reduce((a, b) => puntajes[a] > puntajes[b] ? a : b);
+  const opcionesPerfil = IDEAS_CITAS[perfilGanador];
+  const citaGanadora = opcionesPerfil[Math.floor(Math.random() * opcionesPerfil.length)];
+  
+  resTitulo.textContent = citaGanadora.titulo;
+  resDesc.textContent = citaGanadora.desc;
+  
+  if(citaGanadora.imagen && citaGanadora.imagen !== "") {
+      imgResultado.src = citaGanadora.imagen;
+  }
+}
+
+document.getElementById('btn-reiniciar').addEventListener('click', () => {
+  puntajes = { casera: 0, naturaleza: 0, calle: 0 };
+  preguntaActual = 0;
+  cartaResultado.classList.remove('volteada');
+  cartaResultado.setAttribute('aria-pressed', 'false');
+  contResultado.style.display = 'none';
+  contPreguntas.style.display = 'block';
+  imgResultado.style.display = 'none';
+  cargarPregunta();
+});
+
+cartaResultado.addEventListener('click', () => {
+  const volteada = cartaResultado.classList.toggle('volteada');
+  cartaResultado.setAttribute('aria-pressed', volteada);
+});
+
+cargarPregunta();
+
+/* ============ F. REPRODUCTOR OCULTO DE AUDIO (MP3 EN GITHUB) ============ */
+// Los MP3 deben estar en la misma carpeta que este HTML: cancion1.mp3 ... cancion9.mp3
+const PLAYLIST = [
+  { archivo: "cancion1.mp3", img: "16U8VrwLsOOX5c13knQeFS9lypu0jn8BI" },
+  { archivo: "cancion2.mp3", img: "1cMs4agTebDSrAnALW27_RXNbMj6iH0ms" },
+  { archivo: "cancion3.mp3", img: "10Dd4z17Ww-mAUaVykwYeCvIiTZUDjrBi" },
+  { archivo: "cancion4.mp3", img: "1tJeDW3uA7k0PSZDaExuWBoy--Dv7XFNt" },
+  { archivo: "cancion5.mp3", img: "1dx940sAbFLznuiRaqcTKQkTnFTKto8qR" },
+  { archivo: "cancion6.mp3", img: "1cd8__uYZwbaf2El1F7HuAvbUn5YQMp6Y" },
+  { archivo: "cancion7.mp3", img: "1letD-BsTuhIwOjXG5UvxvCL_1DWPTO_I" },
+  { archivo: "cancion8.mp3", img: "1sRMpbyqHvKzXwWVFCKigIZr9vlq3HyiZ" },
+  { archivo: "cancion9.mp3", img: "1D4RGTF47P5umHQFSl7ZRz1ROlHut8TSe" }
+];
+
+let cancionActual = PLAYLIST[Math.floor(Math.random() * PLAYLIST.length)];
+let reproductorLocal = new Audio(cancionActual.archivo);
+reproductorLocal.preload = 'auto';
+let reproduciendo = false;
+
+const btnMusica = document.getElementById('btn-musica');
+const vinilo = document.getElementById('vinilo');
+const textoMusica = document.getElementById('texto-musica');
+
+// Portada inicial (fotos de tu Drive)
+document.getElementById('portada-vinilo').src = `https://drive.google.com/thumbnail?id=${cancionActual.img}&sz=w200`;
+
+function reproducirSiguiente() {
+    cancionActual = PLAYLIST[Math.floor(Math.random() * PLAYLIST.length)];
+    document.getElementById('portada-vinilo').src = `https://drive.google.com/thumbnail?id=${cancionActual.img}&sz=w200`;
+    reproductorLocal.src = cancionActual.archivo;
+    reproductorLocal.play().catch(err => console.error("No se pudo reproducir:", err));
+}
+
+// Al terminar una canción, salta a otra al azar
+reproductorLocal.addEventListener('ended', reproducirSiguiente);
+
+// La interfaz solo cambia cuando el audio REALMENTE suena
+reproductorLocal.addEventListener('playing', () => {
+    vinilo.classList.add('girando');
+    textoMusica.textContent = "Sonando... 🎵";
+    reproduciendo = true;
+});
+
+// Si el archivo falla (ruta mal, no existe, etc.) lo avisa
+reproductorLocal.addEventListener('error', () => {
+    vinilo.classList.remove('girando');
+    textoMusica.textContent = "No se pudo cargar 😢";
+    reproduciendo = false;
+    console.error("Error de audio:", reproductorLocal.error, reproductorLocal.src);
+});
+
+if (btnMusica) {
+    btnMusica.addEventListener('click', () => {
+      if (reproduciendo) {
+        reproductorLocal.pause();
+        vinilo.classList.remove('girando');
+        textoMusica.textContent = "Reproduceme";
+        reproduciendo = false;
+      } else {
+        textoMusica.textContent = "Cargando audio... ⏳";
+        reproductorLocal.play().catch(err => {
+            textoMusica.textContent = "No se pudo reproducir 😢";
+            console.error("Error al reproducir:", err);
+        });
+      }
+    });
+}
+
+/* ============ E. INICIO ============ */
+mostrarSeccion('afecto');
+</script>
+</body>
+</html>
